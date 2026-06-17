@@ -12,7 +12,6 @@ x  = df["conf_threshold"]
 fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 fig.suptitle("Confidence Threshold Sweep", fontsize=14, fontweight='bold')
 
-# ── 그래프 1: Accuracy ───────────────────────────────────────────────────
 axes[0].plot(x, df["accuracy"], marker='o', color='steelblue')
 axes[0].set_title("Accuracy")
 axes[0].set_xlabel("conf_threshold")
@@ -20,7 +19,6 @@ axes[0].set_ylabel("Accuracy")
 axes[0].set_xticks(x)
 axes[0].grid(True, linestyle='--', alpha=0.5)
 
-# ── 그래프 2: Average Precision ──────────────────────────────────────────
 axes[1].plot(x, df["average_precision"], marker='o', color='darkorange')
 axes[1].set_title("Average Precision")
 axes[1].set_xlabel("conf_threshold")
@@ -28,7 +26,6 @@ axes[1].set_ylabel("AP")
 axes[1].set_xticks(x)
 axes[1].grid(True, linestyle='--', alpha=0.5)
 
-# ── 그래프 3: Semantic Branch Called (%) ─────────────────────────────────
 axes[2].plot(x, df["semantic_called"] * 100, marker='o', color='gray')
 axes[2].set_title("Semantic Branch Called")
 axes[2].set_xlabel("conf_threshold")
