@@ -1,13 +1,15 @@
 import matplotlib
 matplotlib.use('Agg')
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
-csv_path  = "/home/work/ktg0829/final_project/clipforfakedetection/weights/model_save/sweep_results3.csv"
-save_dir  = "/home/work/ktg0829/final_project/clipforfakedetection"
+from paths import MODEL_SAVE_DIR, ROOT
+
+csv_path = MODEL_SAVE_DIR / "sweep_results3.csv"
+save_dir = ROOT
 
 df = pd.read_csv(csv_path)
-x  = df["conf_threshold"]
+x = df["conf_threshold"]
 
 fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 fig.suptitle("Confidence Threshold Sweep", fontsize=14, fontweight='bold')
@@ -30,11 +32,11 @@ axes[2].plot(x, df["semantic_called"] * 100, marker='o', color='gray')
 axes[2].set_title("Semantic Branch Called")
 axes[2].set_xlabel("conf_threshold")
 axes[2].set_ylabel("Semantic called (%)")
-axes[2].set_xticks(x)
 axes[2].set_ylim(0, 105)
+axes[2].set_xticks(x)
 axes[2].grid(True, linestyle='--', alpha=0.5)
 
 plt.tight_layout()
-out_path = f"{save_dir}/sweep_plot3.png"
+out_path = save_dir / "sweep_plot3.png"
 plt.savefig(out_path, dpi=300, bbox_inches='tight')
 print(f"Saved → {out_path}")

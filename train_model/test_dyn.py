@@ -1,11 +1,18 @@
-import os
 import csv
 import json
+import os
+import sys
+from pathlib import Path
+
 import torch
-from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, average_precision_score
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from paths import CLIP_WEIGHTS, MODEL_SAVE_DIR, TESTSET
 from clipfordetectiondata.datasets import TestDataset1
 from models.clipnet_dyn import DynFakeDetector
 
@@ -148,10 +155,10 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    model_save_path = "/home/work/ktg0829/final_project/clipforfakedetection/weights/model_save/best_model_20260603-074224.pth"
+    model_save_path = MODEL_SAVE_DIR / "best_model_20260603-074224.pth"
 
     model = DynFakeDetector(
-        pretrained_model_path="/home/work/ktg0829/final_project/clipforfakedetection/weights/open_clip_pytorch_model.bin",
+        pretrained_model_path=str(CLIP_WEIGHTS),
         normalize=True,
         next_to_last=False,
         conf_threshold=0.8,
@@ -161,10 +168,7 @@ if __name__ == "__main__":
 
     test_dataset = TestDataset1(
         is_train=False,
-        args={
-            "data_path": "/home/work/ktg0829/final_project/clipforfakedetection/testset/",
-            "eval_data_path": "/home/work/ktg0829/final_project/clipforfakedetection/testset/",
-        },
+        args={"data_path": str(TESTSET), "eval_data_path": str(TESTSET)},
     )
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
@@ -192,12 +196,12 @@ if __name__ == "__main__":
             "semantic_called": round(sem_ratio, 6),
         })
 
-    json_path = os.path.join(os.path.dirname(model_save_path), "sweep_results.json")
+    json_path = MODEL_SAVE_DIR / "sweep_results.json"
     with open(json_path, "w") as f:
         json.dump(sweep_results, f, indent=2)
     print(f"\nSweep results saved → {json_path}")
 
-    csv_path = os.path.join(os.path.dirname(model_save_path), "sweep_results.csv")
+    csv_path = MODEL_SAVE_DIR / "sweep_results.csv"
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(
             f, fieldnames=["conf_threshold", "accuracy", "average_precision", "semantic_called"]

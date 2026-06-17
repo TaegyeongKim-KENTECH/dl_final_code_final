@@ -1,4 +1,7 @@
 import os
+import sys
+from pathlib import Path
+
 import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score
@@ -9,8 +12,12 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
 import torch.optim as optim
 
-from clipforfakedetection.clipfordetectiondata.datasets import TrainDataset, TestDataset
-from clipforfakedetection.models.clipnet import OpenClipLinear
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from paths import CLIP_WEIGHTS, MODEL_SAVE_DIR, TRAINSET, VALSET
+from clipfordetectiondata.datasets import TrainDataset, TestDataset
+from models.clipnet import OpenClipLinear
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -180,27 +187,23 @@ def train_model(model, train_dataloader, test_dataloader, epochs, device, save_p
 if __name__ == '__main__':
     train_dataset = TrainDataset(
         is_train=True,
-        args={'data_path': '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/trainset/'},
+        args={'data_path': str(TRAINSET)},
     )
     test_dataset = TestDataset(
         is_train=False,
-        args={
-            'data_path': '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/valset/',
-            'eval_data_path': '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/valset/',
-        },
+        args={'data_path': str(VALSET), 'eval_data_path': str(VALSET)},
     )
 
     train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=128, shuffle=False)
 
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    pretrained_weights_path = '../weights/open_clip_pytorch_model.bin'
 
     try:
         model = OpenClipLinear(
             normalize=True,
             next_to_last=False,
-            pretrained_model_path=pretrained_weights_path,
+            pretrained_model_path=str(CLIP_WEIGHTS),
             freeze_clip=True,
         )
         print("Loaded CLIP model: ViT-L-14")
@@ -208,5 +211,11 @@ if __name__ == '__main__':
         print(f"Error loading CLIP model: {e}")
         raise
 
-    save_path = '../weights/model_save'
-    train_model(model, train_dataloader, test_dataloader, epochs=5, device=device, save_path=save_path)
+    train_model(
+        model,
+        train_dataloader,
+        test_dataloader,
+        epochs=5,
+        device=device,
+        save_path=str(MODEL_SAVE_DIR),
+    )

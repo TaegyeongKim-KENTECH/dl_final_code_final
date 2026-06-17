@@ -1,15 +1,23 @@
+import os
+import sys
+from pathlib import Path
+
 import torch
-import torch.optim as optim
 import torch.nn as nn
-from clipforfakedetection.clipfordetectiondata.datasets import TestDataset, TrainDataset
-from clipforfakedetection.train_model.earlystop import EarlyStopping
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, average_precision_score
 from datetime import datetime
-import os
 from torch.utils.tensorboard import SummaryWriter
-from clipforfakedetection.models.clipnet import OpenClipLinear
 from tqdm import tqdm
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from paths import CLIP_WEIGHTS, MODEL_SAVE_DIR, TRAINSET, VALSET
+from clipfordetectiondata.datasets import TestDataset, TrainDataset
+from models.clipnet import OpenClipLinear
+from train_model.earlystop import EarlyStopping
 
 def evaluate_model(model, dataloader, device, writer, prefix, epoch):
     model.eval()
@@ -98,8 +106,11 @@ def train_model(model, train_dataloader, test_dataloader, epochs, device, save_p
     else:
         print('No better model found.')
 
-train_dataset = TrainDataset(is_train=True, args={'data_path': '/home/pc/code/ljp/clipdetectiondataset/train'})
-test_dataset = TestDataset(is_train=False, args={'data_path': '/home/pc/code/ljp/clipdetectiondataset/val', 'eval_data_path': '/home/pc/code/ljp/clipdetectiondataset/val'})
+train_dataset = TrainDataset(is_train=True, args={'data_path': str(TRAINSET)})
+test_dataset = TestDataset(
+    is_train=False,
+    args={'data_path': str(VALSET), 'eval_data_path': str(VALSET)},
+)
 
 train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
@@ -109,14 +120,13 @@ if torch.cuda.device_count() > 1:
     print(f"Using {torch.cuda.device_count()} GPUs!")
     device = torch.device("cuda:0")
 
-pretrained_weights_path = '../weights/open_clip_pytorch_model.bin'
 model = OpenClipLinear(
     normalize=True,
     next_to_last=False,
-    pretrained_model_path=pretrained_weights_path,
+    pretrained_model_path=str(CLIP_WEIGHTS),
     freeze_clip=True,
 )
-print(f"Loaded CLIP model")
+print("Loaded CLIP model")
 
-save_path = '../weights/model_save'
+save_path = str(MODEL_SAVE_DIR)
 train_model(model, train_dataloader, test_dataloader, epochs=3, device=device, save_path=save_path)

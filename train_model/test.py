@@ -1,11 +1,18 @@
 import os
+import sys
+from pathlib import Path
+
 import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, average_precision_score
 from tqdm import tqdm
 
-from clipforfakedetection.clipfordetectiondata.datasets import TestDataset1
-from clipforfakedetection.models.clipnet import OpenClipLinear
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from paths import CLIP_WEIGHTS, MODEL_SAVE_DIR, TESTSET
+from clipfordetectiondata.datasets import TestDataset1
+from models.clipnet import OpenClipLinear
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -107,14 +114,11 @@ def test_model(model, dataloader, device):
 
 if __name__ == '__main__':
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-    model_save_path = (
-        '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/'
-        'weights/model_save/model_epoch_1_20250417-211519.pth'
-    )
+    model_save_path = MODEL_SAVE_DIR / "model_epoch_1_20250417-211519.pth"
     model = OpenClipLinear(
         normalize=True,
         next_to_last=False,
-        pretrained_model_path='../weights/open_clip_pytorch_model.bin',
+        pretrained_model_path=str(CLIP_WEIGHTS),
         freeze_clip=True,
     )
     model.load_state_dict(torch.load(model_save_path, map_location=device))
@@ -123,10 +127,7 @@ if __name__ == '__main__':
 
     test_dataset = TestDataset1(
         is_train=False,
-        args={
-            'data_path': '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/testset/',
-            'eval_data_path': '/home/work/ktg0829/final_project/Dual-Path-AI-Generated-Image-Detection/testset/',
-        },
+        args={'data_path': str(TESTSET), 'eval_data_path': str(TESTSET)},
     )
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
     test_model(model, test_dataloader, device)

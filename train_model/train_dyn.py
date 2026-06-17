@@ -1,7 +1,9 @@
 import argparse
 import os
+import sys
 from collections import defaultdict
 from datetime import datetime
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -11,6 +13,10 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from paths import CLIP_WEIGHTS, MODEL_SAVE_DIR, TRAINSET, VALSET
 from clipfordetectiondata.datasets import TestDataset, TrainDataset
 from models.clipnet_dyn import DynFakeDetector
 
@@ -255,10 +261,10 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument("--gpu", type=str, default="1")
-    p.add_argument("--data-path", type=str, default="/home/work/ktg0829/final_project/clipforfakedetection/trainset/")
-    p.add_argument("--val-path", type=str, default="/home/work/ktg0829/final_project/clipforfakedetection/valset/")
-    p.add_argument("--weights", type=str, default="/home/work/ktg0829/final_project/clipforfakedetection/weights/open_clip_pytorch_model.bin")
-    p.add_argument("--save-path", type=str, default="/home/work/ktg0829/final_project/clipforfakedetection/weights/model_save/")
+    p.add_argument("--data-path", type=str, default=str(TRAINSET))
+    p.add_argument("--val-path", type=str, default=str(VALSET))
+    p.add_argument("--weights", type=str, default=str(CLIP_WEIGHTS))
+    p.add_argument("--save-path", type=str, default=str(MODEL_SAVE_DIR))
     p.add_argument("--epochs", type=int, default=5)
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--lr", type=float, default=1e-4)
