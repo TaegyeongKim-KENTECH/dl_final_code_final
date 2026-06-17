@@ -1,3 +1,5 @@
+"""Project-root paths resolved from this file's location."""
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent

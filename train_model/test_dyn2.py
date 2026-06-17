@@ -25,6 +25,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def evaluate_model(model, dataloader, device, conf_threshold=None):
+    """Evaluate with per-sample early-exit and per-folder semantic-call stats."""
     if conf_threshold is not None:
         model.conf_threshold = conf_threshold
 
@@ -137,6 +138,7 @@ def evaluate_model(model, dataloader, device, conf_threshold=None):
 
 
 def test_model(model, dataloader, device, conf_threshold=None, save_path=None):
+    """Print metrics and optionally save per-dataset performance plots."""
     (
         accuracy, folder_accuracies, loss,
         average_precision, folder_aps, folder_total_accuracies,
@@ -175,6 +177,7 @@ def _plot_per_dataset(
     folder_accuracies, folder_aps, folder_total_accuracies,
     folder_semantic, overall_acc, overall_ap, save_path,
 ):
+    """Save bar charts of per-dataset accuracy, AP, and semantic usage."""
     folders   = sorted(folder_accuracies.keys())
     acc_real  = [folder_accuracies[f]["correct_0"] / folder_accuracies[f]["total_0"]
                  if folder_accuracies[f]["total_0"] > 0 else 0.0 for f in folders]

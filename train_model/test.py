@@ -18,6 +18,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def evaluate_model(model, dataloader, device):
+    """Run inference and collect overall and per-folder metrics."""
     model.eval()
     predictions = []
     labels = []
@@ -94,6 +95,7 @@ def evaluate_model(model, dataloader, device):
 
 
 def test_model(model, dataloader, device):
+    """Print overall and per-folder test results."""
     accuracy, folder_accuracies, loss, average_precision, folder_aps, folder_total_accuracies = (
         evaluate_model(model, dataloader, device)
     )

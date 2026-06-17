@@ -25,6 +25,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def evaluate_model(model, dataloader, device, conf_threshold=None):
+    """Evaluate with per-sample early-exit and per-folder semantic-call stats."""
     if conf_threshold is not None:
         model.conf_threshold = conf_threshold
 
@@ -137,6 +138,7 @@ def evaluate_model(model, dataloader, device, conf_threshold=None):
 
 
 def test_model(model, dataloader, device, conf_threshold=None, save_path=None):
+    """Print metrics and optionally save per-dataset performance plots."""
     (
         accuracy, folder_accuracies, loss,
         average_precision, folder_aps, folder_total_accuracies,
@@ -321,6 +323,7 @@ if __name__ == "__main__":
 
 
 def _plot_sweep(sweep_results: list, save_path: str):
+    """Plot accuracy, AP, and semantic-call ratio vs conf_threshold."""
     import pandas as pd
     df = pd.DataFrame(sweep_results)
     x  = df["conf_threshold"]

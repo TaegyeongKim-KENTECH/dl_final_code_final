@@ -23,6 +23,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def evaluate_model(model, dataloader, device, writer, prefix, epoch):
+    """Validate model and log per-folder accuracy to TensorBoard."""
     model.eval()
     predictions = []
     labels = []
@@ -78,6 +79,8 @@ def evaluate_model(model, dataloader, device, writer, prefix, epoch):
 
 
 class EarlyStopping:
+    """Stop training when validation score stops improving."""
+
     def __init__(self, patience=5, verbose=False):
         self.patience = patience
         self.verbose = verbose
@@ -111,6 +114,7 @@ class EarlyStopping:
 
 
 def train_model(model, train_dataloader, test_dataloader, epochs, device, save_path):
+    """Train OpenClipLinear and save the best checkpoint by validation accuracy."""
     model.to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(

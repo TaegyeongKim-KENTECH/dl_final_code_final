@@ -8,12 +8,14 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 def canny_edge_count(patch):
+    """Count Canny edge pixels in a PIL patch."""
     patch_cv = np.array(patch)[:, :, ::-1]
     edges = cv2.Canny(patch_cv, 50, 150)
     return np.sum(edges > 0)
 
 
 def patch_img(img, step_size=112):
+    """Return lowest- and highest-edge patches resized to 112x112."""
     img_width, img_height = img.size
     step_size = int(step_size)
     num_patches_x = (img_width + step_size - 1) // step_size

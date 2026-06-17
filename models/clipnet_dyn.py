@@ -5,6 +5,7 @@ import open_clip
 
 
 def DiffSoftmax(logits, tau=1.0, hard=False, dim=-1):
+    """Softmax with temperature; optional straight-through hard gate."""
     y_soft = (logits / tau).softmax(dim)
     if hard:
         index = y_soft.max(dim, keepdim=True)[1]
@@ -62,6 +63,8 @@ class SelfAttention(nn.Module):
 
 
 class ArtifactBranch(nn.Module):
+    """Local + global patch fusion branch for artifact-level forgery cues."""
+
     def __init__(self, clip_model, num_features, normalize=True):
         super().__init__()
         self.clip_model = clip_model
@@ -77,6 +80,7 @@ class ArtifactBranch(nn.Module):
         return self.clip_model.encode_image(img, normalize=self.normalize)
 
     def encode(self, x):
+        """Return fused artifact features [B, F] for gating and classification."""
         fused = []
         for img in x:
             feats = self._clip_encode(img)
@@ -95,6 +99,8 @@ class ArtifactBranch(nn.Module):
 
 
 class SemanticBranch(nn.Module):
+    """Global-patch branch with MLP classifier for semantic forgery cues."""
+
     def __init__(self, clip_model, num_features, hidden_dim=512, normalize=True):
         super().__init__()
         self.clip_model = clip_model
@@ -120,6 +126,8 @@ class SemanticBranch(nn.Module):
 
 
 class GatingNetwork(nn.Module):
+    """Predict artifact vs semantic branch weights from artifact features."""
+
     def __init__(self, in_dim, hidden_dim=128):
         super().__init__()
         self.net = nn.Sequential(
@@ -133,6 +141,8 @@ class GatingNetwork(nn.Module):
 
 
 class DynFakeDetector(nn.Module):
+    """Dynamic dual-branch detector with DynMM training and confidence-based early exit."""
+
     def __init__(
         self,
         pretrained_model_path,
@@ -183,11 +193,13 @@ class DynFakeDetector(nn.Module):
         return tmp[1].item()
 
     def forward(self, x):
+        """Train: (logit, gate_reg_loss). Eval: logit with optional early exit."""
         if self.training:
             return self._forward_train(x)
         return self._forward_infer(x)
 
     def _forward_train(self, x):
+        """DynMM: randomly train one branch per step and regularize the gate."""
         artifact_feat = self.artifact_branch.encode(x)
         pred_artifact = self.artifact_branch.classifier(artifact_feat)
 
@@ -205,6 +217,7 @@ class DynFakeDetector(nn.Module):
         return output, gate_reg_loss
 
     def _forward_infer(self, x):
+        """Run artifact branch first; call semantic branch only when confidence is low."""
         if self.infer_mode == 1:
             return self.artifact_branch(x)
         if self.infer_mode == 2:

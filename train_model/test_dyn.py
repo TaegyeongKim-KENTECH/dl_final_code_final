@@ -22,6 +22,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def evaluate_model(model, dataloader, device, conf_threshold=None):
+    """Evaluate with early-exit tracking; optionally override conf_threshold."""
     if conf_threshold is not None:
         model.conf_threshold = conf_threshold
 
@@ -125,6 +126,7 @@ def evaluate_model(model, dataloader, device, conf_threshold=None):
 
 
 def test_model(model, dataloader, device, conf_threshold=None):
+    """Print test metrics and semantic-branch usage ratio."""
     (
         accuracy, folder_accuracies, loss,
         average_precision, folder_aps, folder_total_accuracies,

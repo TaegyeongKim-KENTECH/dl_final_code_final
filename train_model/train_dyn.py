@@ -22,6 +22,7 @@ from models.clipnet_dyn import DynFakeDetector
 
 
 def evaluate_model(model, dataloader, device, writer, prefix, epoch):
+    """Validate DynFakeDetector and track semantic-branch call ratio."""
     model.eval()
     criterion = nn.BCEWithLogitsLoss()
 
@@ -113,6 +114,8 @@ def evaluate_model(model, dataloader, device, writer, prefix, epoch):
 
 
 class EarlyStopping:
+    """Stop training when validation score stops improving."""
+
     def __init__(self, patience=5, verbose=False):
         self.patience = patience
         self.verbose = verbose
@@ -156,6 +159,7 @@ def train_model(
     lr=1e-4,
     weight_decay=0.0,
 ):
+    """Train DynFakeDetector with task loss + gate regularization."""
     model.to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(
@@ -256,6 +260,7 @@ def train_model(
 
 
 def parse_args():
+    """Parse CLI options for DynFakeDetector training."""
     p = argparse.ArgumentParser(
         "DynFakeDetector training",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

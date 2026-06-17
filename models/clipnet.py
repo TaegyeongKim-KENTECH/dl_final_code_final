@@ -32,6 +32,8 @@ class MultiScaleAttention(nn.Module):
 
 
 class AFF(nn.Module):
+    """Attentive Feature Fusion with multi-scale channel attention."""
+
     def __init__(self, in_dim):
         super(AFF, self).__init__()
         self.query = nn.Linear(in_dim, in_dim)
@@ -75,6 +77,8 @@ class SelfAttention(nn.Module):
 
 
 class OpenClipLinear(nn.Module):
+    """Baseline fake-image detector: frozen CLIP + AFF fusion + linear classifier."""
+
     def __init__(
         self,
         normalize=True,
@@ -105,6 +109,7 @@ class OpenClipLinear(nn.Module):
 
     @torch.no_grad()
     def _clip_encode(self, x):
+        """Encode patches with frozen CLIP (no gradient)."""
         self.clip_model.eval()
         return self.clip_model.encode_image(x, normalize=self.normalize)
 
@@ -112,6 +117,7 @@ class OpenClipLinear(nn.Module):
         return self._clip_encode(x)
 
     def forward(self, x):
+        """Fuse local/global patch features and return logits [B, 1]."""
         batch_size = len(x)
         features_list = [self.forward_features(img) for img in x]
 

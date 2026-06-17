@@ -32,6 +32,7 @@ blur_3_0 = RandomGaussianBlur(kernel_size=(3, 3), sigma=(3.0, 3.0), p=1.0)
 
 
 def safe_perturbations(x):
+    """Apply blur/JPEG augmentations; return input unchanged on failure."""
     try:
         return Perturbations(x)
     except RuntimeError as e:
@@ -92,6 +93,8 @@ transform_before_test_blur3_0 = transforms.Compose([
 
 
 class TrainDataset(Dataset):
+    """Training set returning stacked [max_patch, min_patch, global] tensors."""
+
     def __init__(self, is_train, args):
         root = args['data_path'] if is_train else args['eval_data_path']
         self.data_list = []
@@ -181,6 +184,8 @@ class TrainDataset(Dataset):
 
 
 class TestDataset(Dataset):
+    """Validation set with folder labels for per-dataset metrics."""
+
     def __init__(self, is_train, args):
         root = args['data_path'] if is_train else args['eval_data_path']
         self.data_list = []
@@ -236,6 +241,8 @@ class TestDataset(Dataset):
 
 
 class TestDataset1(Dataset):
+    """Test set supporting flat or nested folder layouts."""
+
     def __init__(self, is_train, args):
         is_train = False
         root = args['data_path'] if is_train else args['eval_data_path']
